@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "name": "0001-enzo.vercel.app",
+    "builds": [
+       { "src": "app.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+       { "src": "/(.*)", "dest": "/app.js" }
+    ]
+ } 

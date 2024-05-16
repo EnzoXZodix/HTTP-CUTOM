@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract JSON Data</title>
+    <style>
+        #output {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .buttons {
+            margin-top: 10px;
+        }
+        button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Extract JSON Data</h1>
+    <textarea id="jsonInput" rows="10" cols="50" placeholder="Masukkan teks JSON di sini..."></textarea>
+    <br><br>
+    <div class="buttons">
+        <button onclick="processJson()">Proses JSON</button>
+        <button onclick="copyToClipboard()">Copy</button>
+        <button onclick="deleteContent()">Delete</button>
+    </div>
+    <pre id="output"></pre>
+
+    <script>
+        function extractJsonData(jsonText) {
+            try {
+                const data = JSON.parse(jsonText);
+
+                const Zxx = "Breaked By Holystixa\nt.me/EstebanZxx / t.me/EstebanZx\nt.me/HolystixaDEC / t.me/EstebanUnlocker\n========================";
+                const payload = data[0] || null;
+                const proxy = data[1] || null;
+                const expiration = data[4] || null;
+                const notes = data[6] || null;
+                const ssh = data[7] || null;
+                const ovpn = data[10] || null;
+                const ovpnauth = data[11] || null;
+                const sni = data[12] || null;
+                const nick = data[18] || null;
+                const v2ray = (data[26] && data[26].replace('\n', '').replace('\t', '').replace('\n', '')) || null;
+                const ns = data[29] || null;
+                const pubkey = data[30] || null;
+                const dns = data[31] || null;
+
+                return {
+                    "Zxx": Zxx,
+                    "Payload": payload,
+                    "Proxy": proxy,
+                    "Expiration": expiration,
+                    "Notes": notes,
+                    "SSH": ssh,
+                    "OVPN": ovpn,
+                    "Auth": ovpnauth,
+                    "SNI": sni,
+                    "NickPowered": nick,
+                    "V2Ray": v2ray,
+                    "ns": ns,
+                    "pubkey": pubkey,
+                    "dns": dns
+                };
+            } catch (error) {
+                console.log(`Error decoding JSON: ${error}`);
+                return null;
+            }
+        }
+
+        function decrypt_ssh(ssh) {
+            if (!ssh) return ssh;
+
+            function decryptor(text) {
+                const lst = text.split('.');
+                const data = lst.filter((_, idx) => idx % 2 === 0).map(Number);
+                const nums = lst.filter((_, idx) => idx % 2 !== 0).map(Number);
+
+                const decrypted_data = data.map((d, idx) => String.fromCharCode((d - data.length) >> (nums[idx] - data.length) & 255)).join('');
+                return decrypted_data;
+            }
+
+            const ssh_encrypted = ssh.match(/([\S]+?):(\S+?)@([\-\d]+)\.(\d+)/);
+            if (ssh_encrypted) {
+                const [host_port, credentials] = ssh.split("@");
+                const [username, password] = credentials.split(":");
+                return `${host_port}@${decryptor(username)}:${decryptor(password)}`;
+            }
+            return ssh;
+        }
+
+        function processJson() {
+            const jsonTextInput = document.getElementById("jsonInput").value;
+            const result = extractJsonData(jsonTextInput);
+
+            if (result) {
+                let outputText = "\n=======================\nResult Extract:\n";
+                for (const [key, value] of Object.entries(result)) {
+                    if (key === "SSH" || key === "Auth" || key === "SNI") {
+                        outputText += `[*][${key}] : ${decrypt_ssh(value)}\n`;
+                    } else {
+                        outputText += `[*][${key}] : ${value}\n`;
+                    }
+                }
+                document.getElementById("output").textContent = outputText;
+            } else {
+                document.getElementById("output").textContent = "Gagal mengekstrak data dari teks JSON.";
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById("output");
+            navigator.clipboard.writeText(output.textContent).then(() => {
+                alert("Hasil telah disalin ke clipboard.");
+            }, (err) => {
+                alert("Gagal menyalin teks: ", err);
+            });
+        }
+
+        function deleteContent() {
+            document.getElementById("jsonInput").value = "";
+            document.getElementById("output").textContent = "";
+        }
+    </script>
+</body>
+</html>
